@@ -1,0 +1,16 @@
+body {
+  transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark-mode {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+body.dark-mode .bg-light {
+  background-color: #333333 !important;
+}
+
+body.dark-mode .navbar-brand {
+  color: #ffffff;
+}

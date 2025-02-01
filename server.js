@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const app = express();
 const database = require("./database/index");
 const ShortUrl = require("./models/shorturl");
@@ -7,6 +8,7 @@ database.initMain();
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", async (req, res) => {
   try {
