@@ -10,12 +10,23 @@ class Database {
   constructor() {}
 
   async initMain() {
-    this.mainConnection = new Sequelize(connectionDatabase);
+    if (process.env.DATABASE_URL)
+      this.mainConnection = new Sequelize(
+        process.env.DATABASE_URL,
+        connectionDatabase
+      );
+    else {
+      this.mainConnection = new Sequelize(connectionDatabase);
+    }
+
     models.forEach((model) => model.init(this.mainConnection));
-    this.mainConnection
-      .sync()
-      .then(() => console.log("Database connected"))
-      .catch((err) => console.error(err));
+
+    try {
+      await this.mainConnection.sync();
+      console.log("Database connected");
+    } catch (error) {
+      console.error("Database connection error: ", error);
+    }
   }
 }
 
