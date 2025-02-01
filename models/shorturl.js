@@ -1,27 +1,61 @@
-const mongoose = require("mongoose");
-const shortId = require("shortid");
+const { Model, DataTypes } = require("sequelize");
+const shortid = require("shortid");
 
-const shortUrlSchema = new mongoose.Schema({
-  full: {
-    type: String,
-    required: [true, "URL completa é obrigatória"],
-    validate: {
-      validator: function (v) {
-        return /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(v);
+const isValidUrl = (url) => {
+  const urlPattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+  return urlPattern.test(url);
+};
+
+class ShortUrl extends Model {
+  static init(sequelize) {
+    super.init(
+      {
+        id: {
+          type: DataTypes.INTEGER,
+          primaryKey: true,
+          autoIncrement: true,
+        },
+        full: {
+          type: DataTypes.STRING(2048),
+          allowNull: false,
+          validate: {
+            notNull: {
+              msg: "URL completa é obrigatória",
+            },
+            isValidUrl: (value) => {
+              if (!isValidUrl(value)) {
+                throw new Error(`${value} não é uma URL válida!`);
+              }
+            },
+          },
+        },
+        short: {
+          type: DataTypes.STRING(10),
+          allowNull: false,
+          unique: true,
+          defaultValue: () => shortid.generate(),
+        },
+        clicks: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          defaultValue: 0,
+        },
+        createdAt: {
+          type: DataTypes.DATE,
+          allowNull: false,
+        },
+        updatedAt: {
+          type: DataTypes.DATE,
+          allowNull: false,
+        },
       },
-      message: (props) => `${props.value} não é uma URL válida!`,
-    },
-  },
-  short: {
-    type: String,
-    required: true,
-    default: shortId.generate,
-  },
-  clicks: {
-    type: Number,
-    required: true,
-    default: 0,
-  },
-});
+      {
+        sequelize,
+        modelName: "ShortUrl",
+        tableName: "short_urls",
+      }
+    );
+  }
+}
 
-module.exports = mongoose.model("ShortUrl", shortUrlSchema);
+module.exports = ShortUrl;
