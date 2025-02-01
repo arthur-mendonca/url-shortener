@@ -15,8 +15,9 @@
   </head>
   <body>
     <header>
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
+      <nav
+        class="navbar navbar-expand-lg navbar-light bg-light fixed-top w-100">
+        <div class="container-fluid">
           <a class="navbar-brand" href="/">URL Shortener</a>
 
           <button id="toggle-dark-mode" class="btn btn-dark">
@@ -26,7 +27,7 @@
       </nav>
     </header>
 
-    <div class="container">
+    <div class="container mt-5">
       <div class="d-flex justify-content-between align-items-center"></div>
 
       <form action="/shorturl" method="POST" class="my-4 bg-light form-control">
@@ -48,40 +49,49 @@
           </div>
         </div>
 
-        <table class="table table-striped table-responsive">
-          <thead>
-            <tr>
-              <th>Full URL</th>
-              <th>Short URL</th>
-              <th>QR Code</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% shorturls.forEach((shorturl) => { %>
-            <tr>
-              <td>
-                <a rel="noreferrer" target="_blank" href="<%= shorturl.full %>"
-                  ><%= shorturl.full %></a
-                >
-              </td>
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Full URL</th>
+                <th>Short URL</th>
+                <th>QR Code</th>
+              </tr>
+            </thead>
 
-              <td>
-                <a rel="noreferrer" target="_blank" href="<%= shorturl.short %>"
-                  ><%= shorturl.short %></a
-                >
-              </td>
+            <tbody>
+              <% shorturls.forEach((shorturl) => { %>
+              <tr>
+                <td>
+                  <a
+                    rel="noreferrer"
+                    target="_blank"
+                    href="<%= shorturl.full %>"
+                    ><%= shorturl.full %></a
+                  >
+                </td>
 
-              <td>
-                <a
-                  href="/qrcode/<%= shorturl.short %>"
-                  class="btn btn-secondary"
-                  >Generate QR Code</a
-                >
-              </td>
-            </tr>
-            <% }); %>
-          </tbody>
-        </table>
+                <td>
+                  <a
+                    rel="noreferrer"
+                    target="_blank"
+                    href="<%= shorturl.short %>"
+                    ><%= shorturl.short %></a
+                  >
+                </td>
+
+                <td>
+                  <a
+                    href="/qrcode/<%= shorturl.short %>"
+                    class="btn btn-secondary"
+                    >Generate
+                  </a>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
       </form>
     </div>
 
