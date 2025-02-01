@@ -1,19 +1,16 @@
 const express = require("express");
 const app = express();
-const mongoose = require("mongoose");
+const database = require("./database/index");
 const ShortUrl = require("./models/shorturl");
 
-mongoose
-  .connect("mongodb://127.0.0.1/urlShortener")
-  .then(() => console.log("MongoDB conectado"))
-  .catch((err) => console.error("Erro de conexão:", err));
+database.initMain();
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: false }));
 
 app.get("/", async (req, res) => {
   try {
-    const urls = await ShortUrl.find();
+    const urls = await ShortUrl.findAll();
     res.render("index", { shorturls: urls });
   } catch (err) {
     console.error(err);
@@ -22,20 +19,31 @@ app.get("/", async (req, res) => {
 });
 
 app.post("/shorturl", async (req, res) => {
-  await ShortUrl.create({ full: req.body.full });
-  res.redirect("/");
+  try {
+    await ShortUrl.create({ full: req.body.full });
+    res.redirect("/");
+  } catch (err) {
+    console.error(err);
+    res.status(400).send("Erro ao criar URL curta: " + err.message);
+  }
 });
 
 app.get("/:shortUrl", async (req, res) => {
-  const shortUrl = await ShortUrl.findOne({ short: req.params.shortUrl });
-  if (shortUrl == null) return res.sendStatus(404);
+  try {
+    const shortUrl = await ShortUrl.findOne({
+      where: { short: req.params.shortUrl },
+    });
 
-  shortUrl.clicks++;
-  shortUrl.save();
+    if (!shortUrl) return res.sendStatus(404);
 
-  res.redirect(shortUrl.full);
+    await shortUrl.increment("clicks");
+    res.redirect(shortUrl.full);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Erro interno do servidor");
+  }
 });
 
 app.listen(process.env.PORT || 3000, () => {
-  console.log("Server is running on port 3000");
+  console.log(`Server is running on port ${process.env.PORT || 3000}`);
 });
