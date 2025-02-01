@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const app = express();
+const QRCode = require("qrcode");
 const database = require("./database/index");
 const ShortUrl = require("./models/shorturl");
 
@@ -40,6 +41,25 @@ app.get("/:shortUrl", async (req, res) => {
 
     await shortUrl.increment("clicks");
     res.redirect(shortUrl.full);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Erro interno do servidor");
+  }
+});
+
+app.get("/qrcode/:shortUrl", async (req, res) => {
+  try {
+    const shortUrl = await ShortUrl.findOne({
+      where: { short: req.params.shortUrl },
+    });
+
+    if (!shortUrl) return res.sendStatus(404);
+
+    const url = `${req.protocol}://${req.get("host")}/${shortUrl.short}`;
+    QRCode.toDataURL(url, (err, src) => {
+      if (err) res.send("Erro ao gerar QR Code");
+      res.render("qrcode", { src });
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send("Erro interno do servidor");
